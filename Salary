@@ -1,0 +1,181 @@
+#Importing the necessary Libraries
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+
+#Reading the Dataset
+dataset = pd.read_csv(r'https://raw.githubusercontent.com/dsrscientist/dataset3/main/Salaries.csv')
+pd.set_option('display.max_columns', None)
+dataset.head(5)
+
+#Overview of the Data
+dataset.shape
+
+dataset.info()
+
+dataset.isnull().sum()
+
+
+dataset.head()
+
+dataset.query('	sex == "Female"')
+
+#Data cleaning
+dataset = dataset.drop_duplicates(['rank','discipline','yrs.since.phd','yrs.service','sex','salary'])
+
+#checking if there is normal distribution
+#plotting boxplot
+dataset.salary.hist()
+
+
+#Main statistics
+dataset[['salary']].describe()
+
+dataset['rank'].unique()
+
+titles = dataset[['rank','salary']]
+                    
+
+  titles.head()
+
+titles['rank'].value_counts()
+
+qualif = dataset[['yrs.since.phd','yrs.service','salary','rank']]
+qualif.head()
+
+
+titles['rank'].value_counts()
+
+
+qualif['yrs.service'].value_counts()
+
+qualif['yrs.since.phd'].value_counts()
+
+rank_classified = ['Prof', 'AsstProf', 'AssocProf']
+data_rank = titles.query('rank in @rank_classified ')
+data_rank 
+
+less_qualified = ['AsstProf', 'AssocProf']
+secondline_rank = qualif.query('rank in @less_qualified')
+secondline_rank.head()
+
+secondline_rank.groupby('rank').mean()
+
+secondline_rank.groupby('rank').median()
+
+data_rank.groupby('rank').mean() 
+
+data_rank.groupby('rank').median()
+
+
+
+
+
+seniors = dataset[['salary','rank']]
+
+sr = ['Prof']
+
+seniors = seniors.query('rank in @sr')
+seniors
+
+
+
+seniors['rank'].value_counts()
+
+
+dataset[['rank','discipline','yrs.since.phd','yrs.service','sex','salary']].corr()
+
+
+#plotting heatmap to show correlation
+
+cmap=sns.diverging_palette(220, 10, as_cmap=True)
+sns.heatmap(dataset[['rank','discipline','yrs.since.phd','yrs.service','sex','salary']].corr(),vmax=.3, center=0, cmap=cmap, square =True,
+           linewidth=.5,cbar_kws={'shrink':.5})
+
+#looking into the categorical variables
+
+df_cat=dataset[['rank','discipline','yrs.since.phd','yrs.service','sex','salary']]
+
+for i in df_cat.columns:
+    cat_num=df_cat[i].value_counts()
+    print("graph for %s: total = %d" % (i,len(cat_num)))
+    chart=sns.barplot(x=cat_num.index, y=cat_num)
+    chart.set_xticklabels(chart.get_xticklabels(), rotation=90)
+    plt.show()
+
+
+
+#pivot table
+
+pd.pivot_table(dataset, index=['rank','discipline'], values='salary')
+
+
+pd.pivot_table(dataset, index='rank', values='salary').sort_values('salary', ascending= False)
+
+
+
+#Boxplot of Salaries
+sns.set(style = 'darkgrid')
+
+fig, axes = plt.subplots(2,1, sharex=True, figsize=(12,8))
+
+plt.xlabel('RANK', color = 'black', fontsize = 12, labelpad = 15)
+
+ax1 = sns.boxplot(ax = axes[0], data =qualif, order = ['salary'], orient = 'h')
+axes[0].set_title('Boxplot - qualif ', fontsize = 15, color = 'black')
+ax2 = sns.boxplot(ax = axes[1], data = seniors, order = ['salary'], orient = 'h')
+axes[1].set_title('Boxplot - Seniors', fontsize = 15, color = 'black')
+
+
+
+
+plt.show()
+
+#Regplot of Salary Correlations
+qualif.corr().round(4)
+
+
+sns.set(style = 'darkgrid')
+sns.set_palette("colorblind")
+
+fig, axes = plt.subplots(1, 2, sharey=True, figsize=(12,8))
+
+ax1= sns.regplot(ax = axes[0], x="yrs.service", y="salary", data=qualif)
+ax1.set_title('Correlation - yrs.service and salary', color = 'black', fontsize = 15, y =1.02)
+axes[0].set_xlabel('yrs.service', color = 'black', fontsize = 12)
+axes[0].set_ylabel('Salary', color = 'black', fontsize = 12)
+
+
+ax2= sns.regplot(ax = axes[1], x="yrs.since.phd", y="salary", data=qualif)
+ax2.set_title('Correlation - yrs.since.phd and Salary', color = 'black', fontsize = 15, y =1.02)
+axes[1].set_xlabel('yrs.since.phd', color = 'black', fontsize = 15)
+axes[1].set_ylabel('Salary', color = 'black', fontsize = 15)
+plt.show()
+
+qualif_overall = dataset[['yrs.since.phd','yrs.service','salary','rank']]
+#seniors = dataset[['salary','rank']]
+
+#Histogram of Salaries
+
+
+fig, axes = plt.subplots(2, 1, sharex=True, figsize=(12,8))
+
+plt.xlabel('Rank', color = 'black', fontsize = 12, labelpad = 15)
+
+ax1 = sns.histplot(ax = axes[0], x = qualif_overall['salary'], color = 'skyblue', label = 'salary', kde = True, bins = 20)
+axes[0].set_title('Histogram - qualif_overall', fontsize = 15, color = 'black')
+axes[0].set_ylabel('Count', color = 'black', fontsize = 12)
+ax1.legend(fontsize = 12)
+
+ax2 = sns.histplot(ax = axes[1], x = seniors['salary'], color = 'red', label = 'Salary', kde = True, bins = 20)
+axes[1].set_title('Histogram - senior_by_salary', fontsize = 15, color = 'black')
+axes[1].set_ylabel('Count', color = 'black', fontsize = 12)
+ax2.legend(fontsize = 12)
+
+
+plt.subplots_adjust(hspace=0.2)
+plt.show()
+
+
+
