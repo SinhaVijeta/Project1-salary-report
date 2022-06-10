@@ -1,0 +1,104 @@
+import numpy as np 
+import pandas as pd 
+import matplotlib.pyplot as plt
+import seaborn as sns
+import warnings
+import textwrap
+warnings.filterwarnings("ignore")
+
+df=pd.read_csv(r"https://raw.githubusercontent.com/dsrscientist/DSData/master/happiness_score_dataset.csv")
+
+#show first five row of data
+df.head()
+
+df.shape
+
+df.describe()
+
+#Count of unique Countries
+len(df["Country"].unique())
+
+data = data.drop(data.index[-1])
+data.info()
+
+data.isnull().sum()
+
+data.describe(include=object)
+
+## dublicates if present
+
+data.duplicated().value_counts()
+
+## number of unique values present
+
+data.nunique()
+
+## top 10 happiest countries
+top_15_countries = df.sort_values(by='Happiness Rank', ascending=False).head(15)
+top_15_countries
+
+print('The Top 15 Happiest Countries')
+top_15_countries['Country']
+
+#looking into the categorical variables
+
+df_cat=df[['Country','Happiness Rank','Economy (GDP per Capita)','Health (Life Expectancy)','Freedom','Generosity','Trust (Government Corruption)']]
+
+for i in df_cat.columns:
+    cat_num=df_cat[i].value_counts()
+    print("graph for %s: total = %d" % (i,len(cat_num)))
+    chart=sns.barplot(x=cat_num.index, y=cat_num)
+    chart.set_xticklabels(chart.get_xticklabels(), rotation=90)
+    plt.show()
+
+
+#count region
+sns.countplot(df["Region"])
+plt.xticks(rotation=60)
+plt.show()
+
+# distribution of feature set-1
+list_features=["Family","Health (Life Expectancy)","Freedom"]
+sns.boxplot(data=df.loc[:, list_features], orient="v", palette="Set2")
+plt.show()
+
+# distribution of feature set-2
+sns.boxplot(data=df["Happiness Score"])
+plt.show()
+
+#Happiest and Unhappiest Countries
+df_happiest_unhappiest= df[(df.loc[:, "Happiness Score"]>7.5)|(df.loc[:, "Happiness Score"]<3.5)]
+sns.barplot(x="Happiness Score", y="Country", data=df_happiest_unhappiest, palette="coolwarm")
+plt.title("Happiest and Unhappiest Countries in 2017")
+plt.show()
+
+#We understand the relationship between them with the corr (correlation) function.
+
+plt.figure(figsize=(14,8))
+torr = df.corr()
+sns.heatmap(torr)
+
+
+#If a company want to increase employee productivity, should look many factors and choos to most associated with the target variable (nearest to 1).
+plt.scatter(x=df["Dystopia Residual"], y=df["Happiness Score"])
+plt.show()
+
+display(data.to_frame())
+
+data = df.groupby('Region').Country.nunique().sort_values(ascending=False)
+with sns.axes_style("whitegrid"):
+    plt.figure(figsize=(5,3))
+    sns.barplot(y=data.index, x=data, palette='Set3')
+    plt.gca().set_xlabel('Country Count')
+    sns.despine(left=True, bottom=True)
+
+
+plt.figure(figsize=(8,6))
+sns.distplot(df['Happiness Score'], kde=False, bins=25)
+
+plt.figure(figsize=(8,6))
+sns.distplot(df['Economy (GDP per Capita)'], kde=False, bins=25)
+
+sns.relplot(x="Happiness Score", y="Health (Life Expectancy)",data=df)
+sns.relplot(x="Happiness Score", y="Economy (GDP per Capita)",data=df)
+
